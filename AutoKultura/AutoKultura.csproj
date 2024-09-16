@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject></StartupObject>
+    <ApplicationIcon>sedan.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="sedan.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocX" Version="3.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
+
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoKultura.DataAccess.Postgres\AutoKultura.DataAccess.SqlServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Dictionary\Add\FormAddBodyWork.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddBrandCar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddPartOfTheCar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddPymentMethod.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddModelCar.cs" />
+    <Compile Update="Dictionary\Add\FormAddServiceType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddMeasureUnit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Add\FormAddMaterial.cs" />
+    <Compile Update="Dictionary\Update\FormUpdatePartOfTheCar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormAddServicesAndMaterialOrder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdatePymentMethod.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateSpecialist.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateServiceType.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateModelCar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateMeasureUnit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateMaterial.cs" />
+    <Compile Update="Dictionary\Update\FormUpdateCompany.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateBrandCar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dictionary\Update\FormUpdateBodyWork.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
