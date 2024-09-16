@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoKultura", "AutoKultura\AutoKultura.csproj", "{9A8964E4-99DF-41F5-86F3-1D16D8EEAD91}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoKultura.DataAccess.SqlServer", "AutoKultura.DataAccess.Postgres\AutoKultura.DataAccess.SqlServer.csproj", "{AFD3BA5A-190A-4DF7-AA91-F08D61A4308B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoKultura.DataAccess.SqlServer", "AutoKultura.DataAccess.SqlServer\AutoKultura.DataAccess.SqlServer.csproj", "{AFD3BA5A-190A-4DF7-AA91-F08D61A4308B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5BADF991-7DFC-4423-BA9D-917D11BC5309}"
 	ProjectSection(SolutionItems) = preProject
