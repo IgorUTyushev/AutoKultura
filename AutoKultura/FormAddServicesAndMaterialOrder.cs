@@ -123,14 +123,17 @@ namespace AutoKultura
 
         private async void BtnAddRenderService_Click(object sender, EventArgs e)
         {
-            if (cmbPartOfTheCar.SelectedItem is ViewPartOfTheCar partOfTheCar)
+            if (CmbServiceType.SelectedItem is ServiceTypeEntity serviceType)
                 try
                 {
+                    Guid? partOfTheCarId = null;
+                    if (cmbPartOfTheCar.SelectedItem is ViewPartOfTheCar partOfTheCar)
+                        partOfTheCarId = partOfTheCar.Id;
                     using AutoKulturaDbContext dbContext = new();
 
                     RenderServiceRepository renderServiceRepository = new(dbContext);
                     _currentRenderServiceId = Guid.NewGuid();
-                    int t = await renderServiceRepository.Add(_currentRenderServiceId, _orderId, partOfTheCar.Id, Convert.ToDecimal(TbPrice.Text));
+                    int t = await renderServiceRepository.Add(_currentRenderServiceId, _orderId, serviceType.Id, partOfTheCarId, Convert.ToDecimal(TbPrice.Text));
 
                     if (t < 1)
                         new formMessage($"Количество обработанных строк {t}", "Добавление работы и детали автомобиля").Show();

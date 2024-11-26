@@ -148,6 +148,7 @@ namespace AutoKultura
             CmbBrandCarFiltr.DataSource = listBrandCarsFiltr;
             CmbBrandCarFiltr.DisplayMember = "Name";
             CmbBrandCarFiltr.ValueMember = "Id";
+            BtnClearNewCustomer_Click(new(), new EventArgs());            
         }
         private async Task FillingCmbCustomer()
         {
@@ -522,6 +523,19 @@ namespace AutoKultura
             return value / 3.53f;
         }
 
+        private static int CalculateRowTableOrderAnOutfit(List <RenderServiceEntity> renderServices)
+        {
+            int rowCount = 2;
+
+            int countNullPartOfTheCar = renderServices.Where(rs => rs.PartOfTheCar == null).Count();
+
+            int countServicesType = renderServices.Select(rs => rs.ServiceTypeId).Distinct().Count();
+
+            int countPartOfTheCar = renderServices.Select(rs => rs.PartOfTheCar != null).Count();
+            rowCount += countPartOfTheCar + countServicesType - countNullPartOfTheCar;
+            return rowCount;
+        }
+
         private async void BtnCreateOrderAnOutfit_Click(object sender, EventArgs e)
         {
             CompanyEntity company;
@@ -531,8 +545,9 @@ namespace AutoKultura
 
                 var buf = await cr.Get();
                 company = buf[0];
+                company.NumberOrderOnOutfit++;
 
-                await cr.Update(company.Id, company.Name, company.Phone, company.Email, company.Adress, company.NumberOrderOnOutfit + 1, company.PathToFilesOrderOnOutfit);
+                await cr.Update(company);
             }
 
 
@@ -577,54 +592,26 @@ namespace AutoKultura
 
             documentOrderOnOutfit.InsertParagraph($"ЗАКАЗ НАРЯД №{company.NumberOrderOnOutfit}").Bold().FontSize(16);
 
-            Paragraph paragrapCustomer = documentOrderOnOutfit.InsertParagraph("Заказчик ").Font("Cambria").FontSize(12);
+            Paragraph paragrapCustomer = documentOrderOnOutfit.InsertParagraph("Заказчик:          ").Font("Cambria").FontSize(12);
             paragrapCustomer.Alignment = Alignment.left;
             paragrapCustomer.IndentationBefore = MmToMeaningDocument(600f);
-            paragrapCustomer.Append(TbCustomerNameInfo.Text).UnderlineStyle(UnderlineStyle.singleLine).FontSize(14);
+            paragrapCustomer.Append(TbCustomerNameInfo.Text).UnderlineStyle(UnderlineStyle.singleLine).Font("Cambria").FontSize(14);
 
-            Paragraph paragraphDataOrder = documentOrderOnOutfit.InsertParagraph($"Заказ принят ").Font("Cambria").FontSize(12);
+            Paragraph paragraphDataOrder = documentOrderOnOutfit.InsertParagraph($"Заказ принят: ").Font("Cambria").FontSize(12);
             paragraphDataOrder.Append($"{dtpDateOrderInfo.Value.ToShortDateString()} в " +
                 $"{dtpDateOrderInfo.Value:HH:mm}").Font("Cambria").UnderlineStyle(UnderlineStyle.singleLine).FontSize(12);
             paragraphDataOrder.Alignment = Alignment.left;
             paragraphDataOrder.IndentationBefore = MmToMeaningDocument(600f);
 
-            Paragraph paragrapCar = documentOrderOnOutfit.InsertParagraph($"Автомобиль ").Font("Cambria").FontSize(12);
+            Paragraph paragrapCar = documentOrderOnOutfit.InsertParagraph($"Автомобиль:   ").Font("Cambria").FontSize(12);
             paragrapCar.Append($"{CmbBrandCarInfo.Text} {CmbModelCarInfo.Text}").Font("Cambria").UnderlineStyle(UnderlineStyle.singleLine).FontSize(12);
-            paragrapCar.Append($"  Гос. Номер: ").Font("Cambria").FontSize(12);
-            paragrapCar.Append($"{TbRegisterNumberInfo.Text}").Font("Cambria").UnderlineStyle(UnderlineStyle.singleLine).FontSize(12);
             paragrapCar.Alignment = Alignment.left;
             paragrapCar.IndentationBefore = MmToMeaningDocument(600f);
 
-            int rowCount = dgvCompletedWorks.Rows.Count;
-
-            int deltaCountRow = 3;
-
-            for (int i = 1; i < dgvCompletedWorks.Rows.Count; i++)
-            {
-                if (dgvCompletedWorks.Rows[i].Cells["NameServiceType"].Value.ToString() !=
-                    dgvCompletedWorks.Rows[i - 1].Cells["NameServiceType"].Value.ToString())
-                    deltaCountRow++;
-            }
-
-            Table tableRenderServices = documentOrderOnOutfit.AddTable(rowCount + deltaCountRow, 4);
-
-            tableRenderServices.Alignment = Alignment.center;
-            tableRenderServices.Design = TableDesign.TableGrid;
-
-            tableRenderServices.Rows[0].Cells[0].Paragraphs[0].Append("№ п/п").FontSize(12).Bold();
-            tableRenderServices.Rows[0].Cells[1].Paragraphs[0].Append("Услуги").FontSize(12).Bold();
-            tableRenderServices.Rows[0].Cells[2].Paragraphs[0].Append("Материалы").FontSize(12).Bold();
-            tableRenderServices.Rows[0].Cells[3].Paragraphs[0].Append("Сумма, руб.").FontSize(12).Bold();
-            tableRenderServices.SetColumnWidth(0, 30);
-            tableRenderServices.SetColumnWidth(1, 250);
-            tableRenderServices.SetColumnWidth(2, 170);
-            tableRenderServices.SetColumnWidth(3, 61);
-
-            tableRenderServices.Rows[^1].MergeCells(0, 2);
-            tableRenderServices.Rows[^1].Cells[0].Paragraphs[0].Append("Итого").FontSize(12).Bold();
-            tableRenderServices.Rows[^1].Cells[1].Paragraphs[0].Append(TbPriceOrderInfo.Text).FontSize(12);
-
-
+            Paragraph paragrapNumber = documentOrderOnOutfit.InsertParagraph($"Гос. Номер:      ").Font("Cambria").FontSize(12);
+            paragrapNumber.Append($"{TbRegisterNumberInfo.Text}").Font("Cambria").UnderlineStyle(UnderlineStyle.singleLine).FontSize(12);
+            paragrapNumber.Alignment = Alignment.left;
+            paragrapNumber.IndentationBefore = MmToMeaningDocument(600f);          
 
 
             using (AutoKulturaDbContext dbContext = new())
@@ -633,13 +620,35 @@ namespace AutoKultura
                 List<RenderServiceEntity> renderServiceEntities = dbContext.RendersServices
                     .AsNoTracking()
                     .Where(rs => rs.OrderId == _currentOrderId)
+                    .Include(rs => rs.ServiceType)
                     .Include(rs => rs.PartOfTheCar)
-                        .ThenInclude(pc => pc.ServiceType)
                     .Include(rs => rs.UsedUpMaterials)
                         .ThenInclude(m => m.Material)
                      .OrderBy(rs => rs.PartOfTheCar.ServiceType.Title)
                     .ToList();
 #pragma warning restore IDE0305 // Упростите инициализацию коллекции
+
+
+                int countRow = CalculateRowTableOrderAnOutfit(renderServiceEntities);
+
+                Table tableRenderServices = documentOrderOnOutfit.AddTable(countRow+3, 4);
+                tableRenderServices.Alignment = Alignment.center;
+                tableRenderServices.Design = TableDesign.TableGrid;
+
+                tableRenderServices.Rows[0].Cells[0].Paragraphs[0].Append("№ п/п").FontSize(12).Bold();
+                tableRenderServices.Rows[0].Cells[1].Paragraphs[0].Append("Услуги").FontSize(12).Bold();
+                tableRenderServices.Rows[0].Cells[2].Paragraphs[0].Append("Материалы").FontSize(12).Bold();
+                tableRenderServices.Rows[0].Cells[3].Paragraphs[0].Append("Сумма, руб.").FontSize(12).Bold();
+                tableRenderServices.SetColumnWidth(0, 30);
+                tableRenderServices.SetColumnWidth(1, 230);
+                tableRenderServices.SetColumnWidth(2, 170);
+                tableRenderServices.SetColumnWidth(3, 80);
+
+                tableRenderServices.Rows[^1].MergeCells(0, 2);
+                tableRenderServices.Rows[^1].Cells[0].Paragraphs[0].Append("Итого").FontSize(12).Bold();
+                tableRenderServices.Rows[^1].Cells[1].Paragraphs[0].Append(TbPriceOrderInfo.Text).FontSize(12);
+
+
                 int indexRowServiceType = 0;
                 int countServiceType = 1;
                 int indexStartMargeCels = 0;
@@ -649,12 +658,13 @@ namespace AutoKultura
                 string usedUpMaterialStr = "";
                 foreach (RenderServiceEntity renderService in renderServiceEntities)
                 {
-                    if (!includeServiceTypeOrderAnOutfit.Contains(renderService.PartOfTheCar.ServiceType.Id))
+                    bool isNullPartOfTheCar = renderService.PartOfTheCar == null;
+                    if (!includeServiceTypeOrderAnOutfit.Contains(renderService.ServiceType.Id))
                     {
                         indexRowServiceType++;
-                        includeServiceTypeOrderAnOutfit.Add(renderService.PartOfTheCar.ServiceType.Id);
+                        includeServiceTypeOrderAnOutfit.Add(renderService.ServiceType.Id);
                         tableRenderServices.Rows[indexRowServiceType].Cells[0].Paragraphs[0].Font("Cambria").Append(countServiceType.ToString()).FontSize(12);
-                        tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderService.PartOfTheCar.ServiceType.Title).FontSize(12);
+                        tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderService.ServiceType.Title).FontSize(12);
                         if (usedUpMaterialStr != "")
                         {
                             usedUpMaterialStr = usedUpMaterialStr.Remove(usedUpMaterialStr.Length - 1);
@@ -662,27 +672,40 @@ namespace AutoKultura
                         }
 
                         includeMaterialsOrderAnOutfit.Clear();
-                        countServiceType++;
+
+                        if(!isNullPartOfTheCar)///////////////////
+                            countServiceType++;
 
                         indexStartMargeCels = indexRowServiceType;
                         usedUpMaterialStr = "";
                     }
 
-                    foreach (UsedUpMaterialEntity usedUpMaterials in renderService.UsedUpMaterials)
+                    //foreach (UsedUpMaterialEntity usedUpMaterials in renderService.UsedUpMaterials)
+                    //{
+                    //    if (!includeMaterialsOrderAnOutfit.Contains(usedUpMaterials.Material.Id))
+                    //    {
+                    //        includeMaterialsOrderAnOutfit.Add(usedUpMaterials.Material.Id);
+                    //        usedUpMaterialStr += usedUpMaterials.Material.Name + "\n";
+                    //        //tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterials.Material.Name ).FontSize(12);
+                    //    }
+                    //}
+                   
+
+                    string serviceTypeOrPartOC = "";
+                    int indexRowMaterial = indexRowServiceType;
+
+                    if (!isNullPartOfTheCar)
                     {
-                        if (!includeMaterialsOrderAnOutfit.Contains(usedUpMaterials.Material.Id))
-                        {
-                            includeMaterialsOrderAnOutfit.Add(usedUpMaterials.Material.Id);
-                            usedUpMaterialStr += usedUpMaterials.Material.Name + "\n";
-                            //tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterials.Material.Name ).FontSize(12);
-                        }
+                        indexRowMaterial++;
+                        tableRenderServices.MergeCellsInColumn(0, indexStartMargeCels, indexRowServiceType + 1);
+                        serviceTypeOrPartOC = renderService.PartOfTheCar.Name;
+                        tableRenderServices.Rows[indexRowMaterial].Cells[1].Paragraphs[0].Font("Cambria").Append(serviceTypeOrPartOC).FontSize(12);
+                        tableRenderServices.Rows[indexRowMaterial].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
                     }
-
-
-
-                    tableRenderServices.MergeCellsInColumn(0, indexStartMargeCels, indexRowServiceType + 1);
-                    tableRenderServices.Rows[indexRowServiceType + 1].Cells[1].Paragraphs[0].Font("Cambria").Append(renderService.PartOfTheCar.Name).FontSize(12);
-                    tableRenderServices.Rows[indexRowServiceType + 1].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
+                    else
+                    {
+                        tableRenderServices.Rows[indexRowServiceType].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
+                    }
 
                     indexRowServiceType++;
                 }
@@ -692,10 +715,12 @@ namespace AutoKultura
                     usedUpMaterialStr = usedUpMaterialStr.Remove(usedUpMaterialStr.Length - 1);
                     tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterialStr).FontSize(12);
                 }
+
+                documentOrderOnOutfit.InsertParagraph().InsertTableAfterSelf(tableRenderServices);
             }
 
 
-            documentOrderOnOutfit.InsertParagraph().InsertTableAfterSelf(tableRenderServices);
+            
             documentOrderOnOutfit.InsertParagraph();
             documentOrderOnOutfit.InsertParagraph();
 
@@ -704,14 +729,79 @@ namespace AutoKultura
             paragraphDeliveryOfTheOrder.Append($"{DtpDeliveryOfTheOrder.Value.ToShortDateString()} "
                 + $"{DtpDeliveryOfTheOrder.Value:HH:mm}").Font("Cambria").FontSize(12).UnderlineStyle(UnderlineStyle.singleLine).Alignment = Alignment.both;
 
-            documentOrderOnOutfit.InsertParagraph($"Подпись мастера (ФИО) __________________________________________________________________").Font("Cambria").FontSize(12).Alignment = Alignment.both;
-            documentOrderOnOutfit.InsertParagraph($"Настоящим я, {TbCustomerNameInfo.Text}, принимаю автомобиль и выполненные работы в полном объеме, претензий по качеству выполненных работ, состоянию и комплектации не имею ________________________").Font("Cambria").FontSize(12).Alignment = Alignment.both;
+            documentOrderOnOutfit.InsertParagraph();
+            Paragraph paragraphMaster = documentOrderOnOutfit.InsertParagraph($"Подпись мастера (ФИО) _________________________________/").Font("Cambria").FontSize(12);
+            paragraphMaster.Alignment = Alignment.both;
+            paragraphMaster.Append($" {company.Master}").Font("Cambria").FontSize(12);
+
+            documentOrderOnOutfit.InsertParagraph();
+            Paragraph paragraphCustomer = documentOrderOnOutfit.InsertParagraph($"Подпись заказчика (ФИО) ______________________________/").Font("Cambria").FontSize(12);
+            paragraphCustomer.Alignment = Alignment.both;
+            paragraphCustomer.Append($" {TbCustomerNameInfo.Text}").Font("Cambria").FontSize(12);
+            
+            documentOrderOnOutfit.InsertParagraph();
+            documentOrderOnOutfit.InsertParagraph();
+
+            if (cbWarranty.Checked)
+            {
+                documentOrderOnOutfit.InsertParagraph($"Компания  {company.Name} предоставляет гарантию сроком на 1 год на все выполненные работы.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"Условия гарантии:").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* Гарантия действительна при условии предъявления Заказ-наряда и сохранения всех документов, подтверждающих оплату услуг.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* Гарантия не распространяется на повреждения, возникшие по вине клиента или в результате несоблюдения им рекомендаций по эксплуатации автомобиля.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* В случае обнаружения дефектов в течение гарантийного срока, клиент обязан обратиться в компанию {company.Name} для проведения диагностики и устранения неисправности.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"Основание для предоставления гарантии:").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* Закон \"О защите прав потребителей\" от 07.02.1992 г. № 2300-I: Статья 29 данного закона определяет право потребителя на гарантию на товары и услуги, а также устанавливает порядок обращения потребителя с претензиями в случае обнаружения недостатков.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"Процедура предъявления гарантийных претензий:").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* **В случае обнаружения дефектов в течение гарантийного срока, необходимо обратиться в компанию {company.Name} по телефону {phonesCompany[0]}" +
+                    $", либо приехать в сервисный центр по адресу {company.Adress}.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* Предоставить Заказ-наряд и документы, подтверждающие оплату услуг.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"* Сотрудники {company.Name} проведут диагностику и устранят дефекты за свой счет.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph();                
+                documentOrderOnOutfit.InsertParagraph($"{company.Name} гарантирует высокое качество работ и профессиональный подход к каждому клиенту.").Font("Cambria").FontSize(8);
+
+                documentOrderOnOutfit.InsertParagraph();
+                documentOrderOnOutfit.InsertParagraph();
+
+                documentOrderOnOutfit.InsertParagraph($"Простые правила ухода за автомобилем после оклейки позволят сохранить состояние пленки долгие годы. Напоминаем, что мы предоставляем гарантийный период до 1 года с момента контрольного осмотра.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"Итак, делимся простыми правилами ухода:").Bold().Font("Cambria").FontSize(8);
+                var buf1 = documentOrderOnOutfit.InsertParagraph($"1. После оклейки автомобиля пленкой, окончательное сцепление с поверхностью кузова наступает не ранее, чем через трое суток. Поэтому мы ").Font("Cambria").FontSize(8);
+                buf1.Append("не рекомендуем самостоятельно мыть машину в течение 10 дней, ").Bold().Font("Cambria").FontSize(8);
+                buf1.Append("а пользоваться автомойкой наши специалисты советуют ").Font("Cambria").FontSize(8);
+                buf1.Append("только через 10-14 дней ").Bold().Font("Cambria").FontSize(8);
+                buf1.Append("после оклейки автомобиля. ").Font("Cambria").FontSize(8);
+                var buf2 = documentOrderOnOutfit.InsertParagraph($"2. При мытье кузова предупреждайте сотрудников автомойки о ").Font("Cambria").FontSize(8);
+                buf2.Append("недопустимости приближения сопла мойки высокого давления ").Bold().Font("Cambria").FontSize(8);
+                buf2.Append("к поверхности кузова ближе, чем на 1/2 метра.").Font("Cambria").FontSize(8);
+
+                var buf3 = documentOrderOnOutfit.InsertParagraph($"3. Не используйте ").Font("Cambria").FontSize(8);
+                buf3.Append("щеточные элементы при проведении мойки. ").Bold().Font("Cambria").FontSize(8);
+                buf3.Append("Ворс щеток может оставить микроцарапины на поверхности и повредить стыки пленки. Бесщеточная автомойка является наиболее приемлемым способом для автомобилей, оклеенных полиуретановой пленкой.").Font("Cambria").FontSize(8);
+
+                var buf4 = documentOrderOnOutfit.InsertParagraph($"4. Не используйте напор воды с очень высоким давлением ").Bold().Font("Cambria").FontSize(8);
+                buf4.Append("для мытья автомобиля.").Font("Cambria").FontSize(8);
+
+                var buf5 = documentOrderOnOutfit.InsertParagraph($"5. Избегайте попадание масла или топлива ").Bold().Font("Cambria").FontSize(8);
+                buf5.Append("на оклеенную часть автомобиля. При попадании незамедлительно удалите вещество с поверхности при помощи воды, а затем протрите этот участок насухо микрофибровым полотенцем.").Font("Cambria").FontSize(8);
+
+                documentOrderOnOutfit.InsertParagraph($"Обращаем ваше внимание:").Bold().Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"Мы настоятельно рекомендуем произвести контрольный осмотр в {company.Name} для коррекции пленки. Гарантийный период начинает действовать после контрольного осмотра нашего специалиста. Если контрольный осмотр и коррекция пленки не были произведены в рекомендованные сроки нашими специалистами, повреждение пленки в будущем не будут считаться гарантийным случаем.").Font("Cambria").FontSize(8);
+
+                documentOrderOnOutfit.InsertParagraph($"Гарантийный случай:").Bold().Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"    - Появление пузырей воздуха под пленкой (если пленка не повреждена на участке, где находится пузырь и поверхность не имеет коррозий);").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"    - Отклеивание уголков пленки (углы капота, дверей, крыльев, порогов и на иных оклеенных элементах).").Font("Cambria").FontSize(8);
+
+                documentOrderOnOutfit.InsertParagraph($"Гарантийным случаем не является:").Bold().Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"    - Разрыв пленки от ударов (камней, притертостей, ДТП);").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"    - Разрыв пленки от аппаратов высокого давления на моечных процедурах;").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"    - Механический подъём края пленки от напора воды.").Font("Cambria").FontSize(8);
+                documentOrderOnOutfit.InsertParagraph($"При обнаружении дефектов рекомендуем незамедлительно связаться с нами. Не рекомендуем исправлять дефекты самостоятельно!").Font("Cambria").FontSize(8);
+            }
 
             try
             {
-                documentOrderOnOutfit.Save();
+               documentOrderOnOutfit.Save();
             }
-            catch (Exception) { MessageBox.Show("Невозможно создать заказ наряд так, как документ с таким же именем уже открыт", "Ошибка"); }
+            catch (Exception ex) { MessageBox.Show("Невозможно создать заказ наряд так, как документ с таким же именем уже открыт\n" + ex.Message, "Ошибка"); }
             var p = new Process();
             string filename = company.PathToFilesOrderOnOutfit + $"\\Заказ наряд для клиента {TbCustomerNameInfo.Text} машина {CmbBrandCarInfo.Text} {CmbModelCarInfo.Text}.docx";
             p.StartInfo = new ProcessStartInfo(filename)
@@ -813,6 +903,8 @@ namespace AutoKultura
             TbPhoneCustomer.Text = string.Empty;
             CmbNameCustomer.Text = string.Empty;
             TbRegisterNumber.Text = string.Empty;
+            cmbModelCarAdd.Text = string.Empty;
+            CmbBrandCarAdd.Text = string.Empty;
         }
 
         private async void BtnAddNewCustomer_Click(object sender, EventArgs e)

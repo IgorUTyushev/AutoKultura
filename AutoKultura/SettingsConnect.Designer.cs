@@ -140,6 +140,7 @@
             MaximumSize = new Size(445, 225);
             MinimumSize = new Size(445, 225);
             Name = "SettingsConnect";
+            ShowInTaskbar = false;
             Text = "Настройки подключения";
             FormClosing += SettingsConnect_FormClosing;
             ResumeLayout(false);

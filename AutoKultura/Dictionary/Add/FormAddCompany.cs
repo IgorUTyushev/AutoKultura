@@ -27,7 +27,15 @@ namespace AutoKultura.Add
                 using AutoKulturaDbContext dbContext = new();
                 CompanyRepository cr = new(dbContext);
 
-                int t = await cr.Add(new Guid(), TbName.Text, TbPhone.Text, TbEmail.Text, RtbAdress.Text, Convert.ToInt32(TbNumberOrderOnOutfit.Text), TbPath.Text);
+                int t = await cr.Add(new DataAccess.SqlServer.Models.CompanyEntity
+                               { Id = new Guid(),
+                                Name = TbName.Text,
+                                Phone = TbPhone.Text, 
+                                Email = TbEmail.Text,
+                                Adress = RtbAdress.Text,
+                                Master = tbMaster.Text,
+                                NumberOrderOnOutfit = Convert.ToInt32(TbNumberOrderOnOutfit.Text),
+                                PathToFilesOrderOnOutfit = TbPath.Text });
                 if (t > 0)
                     new formMessage($"Компания \"{TbName.Text}\" добавлена", "Добавление информации о компании", true).Show();
                 else

@@ -480,7 +480,8 @@ namespace AutoKultura
                 var buf = await cr.Get();
                 company = buf[0];
 
-                await cr.Update(company.Id, company.Name, company.Phone, company.Email, company.Adress, company.NumberOrderOnOutfit + 1, company.PathToFilesOrderOnOutfit);
+                company.NumberOrderOnOutfit++;
+                await cr.Update(company);
             }
 
 

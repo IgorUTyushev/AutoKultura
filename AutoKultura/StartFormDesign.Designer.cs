@@ -60,7 +60,7 @@
             btnSettingConnect = new Button();
             leftPanelSettingsConnect = new Panel();
             panel4 = new Panel();
-            label1 = new Label();
+            pictureBox1 = new PictureBox();
             lbl35 = new Label();
             label6 = new Label();
             label2 = new Label();
@@ -117,6 +117,7 @@
             label8 = new Label();
             label7 = new Label();
             panel10 = new Panel();
+            cbWarranty = new CheckBox();
             btnCreateOrderAnOutfit = new Button();
             dtpDateOrderInfo = new DateTimePicker();
             label19 = new Label();
@@ -144,11 +145,11 @@
             label32 = new Label();
             label33 = new Label();
             panel1 = new Panel();
+            TbEmailCustomer = new TextBox();
             CmbNameCustomer = new ComboBox();
             label23 = new Label();
             TbPhoneCustomer = new MaskedTextBox();
             TbAdditionalInformationCustomer = new RichTextBox();
-            TbEmailCustomer = new TextBox();
             label24 = new Label();
             label25 = new Label();
             label26 = new Label();
@@ -160,6 +161,7 @@
             panel7.SuspendLayout();
             panel5.SuspendLayout();
             panel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -390,21 +392,23 @@
             // panel4
             // 
             panel4.BackColor = Color.FromArgb(46, 46, 50);
-            panel4.Controls.Add(label1);
+            panel4.Controls.Add(pictureBox1);
             panel4.Dock = DockStyle.Top;
             panel4.Location = new Point(0, 0);
             panel4.Name = "panel4";
             panel4.Size = new Size(206, 84);
             panel4.TabIndex = 0;
             // 
-            // label1
+            // pictureBox1
             // 
-            label1.Dock = DockStyle.Fill;
-            label1.Image = (Image)resources.GetObject("label1.Image");
-            label1.Location = new Point(0, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(206, 84);
-            label1.TabIndex = 0;
+            pictureBox1.Dock = DockStyle.Top;
+            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(206, 90);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.TabIndex = 2;
+            pictureBox1.TabStop = false;
             // 
             // lbl35
             // 
@@ -605,7 +609,7 @@
             TbRegisterNumberFiltr.Font = new Font("Segoe UI", 9.75F);
             TbRegisterNumberFiltr.InsertKeyMode = InsertKeyMode.Overwrite;
             TbRegisterNumberFiltr.Location = new Point(526, 13);
-            TbRegisterNumberFiltr.Mask = "L 000 LL 00";
+            TbRegisterNumberFiltr.Mask = ">L 000 LL 000";
             TbRegisterNumberFiltr.Name = "TbRegisterNumberFiltr";
             TbRegisterNumberFiltr.Size = new Size(116, 25);
             TbRegisterNumberFiltr.TabIndex = 2;
@@ -788,7 +792,7 @@
             // 
             scSpecialistRenderService.Panel2.Controls.Add(panelMasters);
             scSpecialistRenderService.Size = new Size(614, 436);
-            scSpecialistRenderService.SplitterDistance = 324;
+            scSpecialistRenderService.SplitterDistance = 331;
             scSpecialistRenderService.TabIndex = 5;
             // 
             // scRenderService
@@ -805,8 +809,8 @@
             // scRenderService.Panel2
             // 
             scRenderService.Panel2.Controls.Add(panelUsedMaterial);
-            scRenderService.Size = new Size(614, 324);
-            scRenderService.SplitterDistance = 157;
+            scRenderService.Size = new Size(614, 331);
+            scRenderService.SplitterDistance = 173;
             scRenderService.TabIndex = 36;
             // 
             // panelWork
@@ -818,7 +822,7 @@
             panelWork.Dock = DockStyle.Fill;
             panelWork.Location = new Point(0, 0);
             panelWork.Name = "panelWork";
-            panelWork.Size = new Size(614, 157);
+            panelWork.Size = new Size(614, 173);
             panelWork.TabIndex = 2;
             // 
             // BtnAddServiceType
@@ -882,7 +886,7 @@
             dgvCompletedWorks.RowHeadersVisible = false;
             dgvCompletedWorks.RowHeadersWidth = 10;
             dgvCompletedWorks.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvCompletedWorks.Size = new Size(612, 126);
+            dgvCompletedWorks.Size = new Size(612, 142);
             dgvCompletedWorks.TabIndex = 34;
             // 
             // label13
@@ -905,7 +909,7 @@
             panelUsedMaterial.Dock = DockStyle.Fill;
             panelUsedMaterial.Location = new Point(0, 0);
             panelUsedMaterial.Name = "panelUsedMaterial";
-            panelUsedMaterial.Size = new Size(614, 163);
+            panelUsedMaterial.Size = new Size(614, 154);
             panelUsedMaterial.TabIndex = 4;
             // 
             // dgvUsedUpMaterial
@@ -951,7 +955,7 @@
             dgvUsedUpMaterial.RowHeadersVisible = false;
             dgvUsedUpMaterial.RowHeadersWidth = 10;
             dgvUsedUpMaterial.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvUsedUpMaterial.Size = new Size(614, 134);
+            dgvUsedUpMaterial.Size = new Size(614, 125);
             dgvUsedUpMaterial.TabIndex = 34;
             // 
             // label17
@@ -974,7 +978,7 @@
             panelMasters.Dock = DockStyle.Fill;
             panelMasters.Location = new Point(0, 0);
             panelMasters.Name = "panelMasters";
-            panelMasters.Size = new Size(614, 108);
+            panelMasters.Size = new Size(614, 101);
             panelMasters.TabIndex = 35;
             // 
             // dgvSpecialist
@@ -1026,7 +1030,7 @@
             dataGridViewCellStyle14.SelectionForeColor = Color.White;
             dgvSpecialist.RowsDefaultCellStyle = dataGridViewCellStyle14;
             dgvSpecialist.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvSpecialist.Size = new Size(614, 79);
+            dgvSpecialist.Size = new Size(614, 72);
             dgvSpecialist.TabIndex = 34;
             // 
             // label18
@@ -1063,11 +1067,10 @@
             TbRegisterNumberInfo.BackColor = Color.White;
             TbRegisterNumberInfo.Font = new Font("Segoe UI", 9.75F);
             TbRegisterNumberInfo.Location = new Point(78, 111);
-            TbRegisterNumberInfo.Mask = "L 000 LL 00";
+            TbRegisterNumberInfo.Mask = ">L 000 LL 000";
             TbRegisterNumberInfo.Name = "TbRegisterNumberInfo";
             TbRegisterNumberInfo.Size = new Size(120, 25);
             TbRegisterNumberInfo.TabIndex = 16;
-            TbRegisterNumberInfo.Text = "А000АА00";
             // 
             // btnChangeVechicle
             // 
@@ -1304,6 +1307,7 @@
             // 
             // panel10
             // 
+            panel10.Controls.Add(cbWarranty);
             panel10.Controls.Add(btnCreateOrderAnOutfit);
             panel10.Controls.Add(dtpDateOrderInfo);
             panel10.Controls.Add(label19);
@@ -1315,11 +1319,32 @@
             panel10.Controls.Add(CmbPymentMethodInfo);
             panel10.Controls.Add(label20);
             panel10.Controls.Add(label21);
+            panel10.Cursor = Cursors.Hand;
             panel10.Dock = DockStyle.Bottom;
             panel10.Location = new Point(0, 750);
             panel10.Name = "panel10";
             panel10.Size = new Size(614, 155);
             panel10.TabIndex = 3;
+            // 
+            // cbWarranty
+            // 
+            cbWarranty.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            cbWarranty.BackColor = Color.FromArgb(52, 52, 52);
+            cbWarranty.Checked = true;
+            cbWarranty.CheckState = CheckState.Checked;
+            cbWarranty.FlatAppearance.BorderColor = Color.Red;
+            cbWarranty.FlatAppearance.CheckedBackColor = Color.Yellow;
+            cbWarranty.FlatAppearance.MouseDownBackColor = Color.FromArgb(0, 192, 0);
+            cbWarranty.FlatAppearance.MouseOverBackColor = Color.Red;
+            cbWarranty.FlatStyle = FlatStyle.Flat;
+            cbWarranty.ForeColor = Color.White;
+            cbWarranty.Location = new Point(315, 86);
+            cbWarranty.Name = "cbWarranty";
+            cbWarranty.Size = new Size(102, 60);
+            cbWarranty.TabIndex = 53;
+            cbWarranty.TabStop = false;
+            cbWarranty.Text = "Включить гарантийные обязательства";
+            cbWarranty.UseVisualStyleBackColor = false;
             // 
             // btnCreateOrderAnOutfit
             // 
@@ -1331,7 +1356,7 @@
             btnCreateOrderAnOutfit.ForeColor = Color.FromArgb(150, 150, 150);
             btnCreateOrderAnOutfit.Image = (Image)resources.GetObject("btnCreateOrderAnOutfit.Image");
             btnCreateOrderAnOutfit.ImageAlign = ContentAlignment.TopCenter;
-            btnCreateOrderAnOutfit.Location = new Point(403, 63);
+            btnCreateOrderAnOutfit.Location = new Point(414, 71);
             btnCreateOrderAnOutfit.Name = "btnCreateOrderAnOutfit";
             btnCreateOrderAnOutfit.Size = new Size(96, 75);
             btnCreateOrderAnOutfit.TabIndex = 24;
@@ -1387,7 +1412,7 @@
             BtnChangeOrder.ForeColor = Color.FromArgb(150, 150, 150);
             BtnChangeOrder.Image = (Image)resources.GetObject("BtnChangeOrder.Image");
             BtnChangeOrder.ImageAlign = ContentAlignment.BottomCenter;
-            BtnChangeOrder.Location = new Point(503, 64);
+            BtnChangeOrder.Location = new Point(512, 71);
             BtnChangeOrder.Name = "BtnChangeOrder";
             BtnChangeOrder.Size = new Size(99, 75);
             BtnChangeOrder.TabIndex = 23;
@@ -1577,7 +1602,7 @@
             TbRegisterNumber.BackColor = Color.White;
             TbRegisterNumber.Font = new Font("Segoe UI", 9.75F);
             TbRegisterNumber.Location = new Point(78, 106);
-            TbRegisterNumber.Mask = "L 000 LL 00";
+            TbRegisterNumber.Mask = ">L 000 LL 000";
             TbRegisterNumber.Name = "TbRegisterNumber";
             TbRegisterNumber.Size = new Size(120, 25);
             TbRegisterNumber.TabIndex = 16;
@@ -1657,11 +1682,11 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(TbEmailCustomer);
             panel1.Controls.Add(CmbNameCustomer);
             panel1.Controls.Add(label23);
             panel1.Controls.Add(TbPhoneCustomer);
             panel1.Controls.Add(TbAdditionalInformationCustomer);
-            panel1.Controls.Add(TbEmailCustomer);
             panel1.Controls.Add(label24);
             panel1.Controls.Add(label25);
             panel1.Controls.Add(label26);
@@ -1671,6 +1696,14 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(96, 161);
             panel1.TabIndex = 2;
+            // 
+            // TbEmailCustomer
+            // 
+            TbEmailCustomer.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            TbEmailCustomer.Location = new Point(266, 76);
+            TbEmailCustomer.Name = "TbEmailCustomer";
+            TbEmailCustomer.Size = new Size(0, 23);
+            TbEmailCustomer.TabIndex = 34;
             // 
             // CmbNameCustomer
             // 
@@ -1713,23 +1746,11 @@
             TbAdditionalInformationCustomer.BackColor = Color.White;
             TbAdditionalInformationCustomer.Font = new Font("Segoe UI", 9.75F);
             TbAdditionalInformationCustomer.ForeColor = Color.Black;
-            TbAdditionalInformationCustomer.Location = new Point(122, 112);
+            TbAdditionalInformationCustomer.Location = new Point(130, 112);
             TbAdditionalInformationCustomer.Name = "TbAdditionalInformationCustomer";
             TbAdditionalInformationCustomer.Size = new Size(0, 44);
             TbAdditionalInformationCustomer.TabIndex = 12;
             TbAdditionalInformationCustomer.Text = "";
-            // 
-            // TbEmailCustomer
-            // 
-            TbEmailCustomer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            TbEmailCustomer.BackColor = Color.White;
-            TbEmailCustomer.Font = new Font("Segoe UI", 9.75F);
-            TbEmailCustomer.ForeColor = Color.Black;
-            TbEmailCustomer.Location = new Point(266, 76);
-            TbEmailCustomer.Name = "TbEmailCustomer";
-            TbEmailCustomer.PlaceholderText = "Email";
-            TbEmailCustomer.Size = new Size(0, 25);
-            TbEmailCustomer.TabIndex = 11;
             // 
             // label24
             // 
@@ -1748,7 +1769,7 @@
             label25.ForeColor = Color.FromArgb(250, 250, 250);
             label25.Location = new Point(217, 73);
             label25.Name = "label25";
-            label25.Size = new Size(74, 29);
+            label25.Size = new Size(43, 29);
             label25.TabIndex = 25;
             label25.Text = "Email";
             label25.TextAlign = ContentAlignment.MiddleLeft;
@@ -1795,6 +1816,7 @@
             panel7.ResumeLayout(false);
             panel5.ResumeLayout(false);
             panel4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
@@ -1838,7 +1860,6 @@
         #endregion
         private Panel panel2;
         private Panel panel4;
-        private Label label1;
         private Panel panel5;
         private Panel leftPanelSettingsConnect;
         private Panel panel7;
@@ -1920,7 +1941,6 @@
         private Label label23;
         private MaskedTextBox TbPhoneCustomer;
         private RichTextBox TbAdditionalInformationCustomer;
-        private TextBox TbEmailCustomer;
         private Label label24;
         private Label label25;
         private Label label26;
@@ -1945,5 +1965,8 @@
         private ToolStripMenuItem удалитьToolStripMenuItem;
         private Label label36;
         private FlowLayoutPanel panelOrderToday;
+        private TextBox TbEmailCustomer;
+        private PictureBox pictureBox1;
+        private CheckBox cbWarranty;
     }
 }
