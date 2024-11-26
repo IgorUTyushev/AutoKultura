@@ -124,6 +124,7 @@ namespace AutoKultura
         private async void BtnAddRenderService_Click(object sender, EventArgs e)
         {
             if (CmbServiceType.SelectedItem is ServiceTypeEntity serviceType)
+            {
                 try
                 {
                     Guid? partOfTheCarId = null;
@@ -133,17 +134,20 @@ namespace AutoKultura
 
                     RenderServiceRepository renderServiceRepository = new(dbContext);
                     _currentRenderServiceId = Guid.NewGuid();
-                    int t = await renderServiceRepository.Add(_currentRenderServiceId, _orderId, serviceType.Id, partOfTheCarId, Convert.ToDecimal(TbPrice.Text));
+                    var result = await renderServiceRepository.Add(_currentRenderServiceId, _orderId, serviceType.Id, partOfTheCarId, Convert.ToDecimal(TbPrice.Text));
 
-                    if (t < 1)
-                        new formMessage($"Количество обработанных строк {t}", "Добавление работы и детали автомобиля").Show();
-                    else
-                        await ReadRenderServices();
+                    if (_currentRenderServiceId != result.Id)
+                    {
+                        _currentRenderServiceId = result.Id;
+                        //new formMessage($"Выполненые работы {result.ServiceType.Title} {result.PartOfTheCar.Name} уже существуют", "Добавление работы и детали автомобиля", false).Show();
+                    }
+                    
+                    await ReadRenderServices();
                 }
                 catch (Exception ex) { new formMessage(ex.Message, "Добавление работы и детали автомобиля").Show(); }
-
+            }
             else
-                new formMessage($"Выберите деталь автомобиля на которой производились работы", "Добавление работы и детали автомобиля", false).Show();
+                new formMessage($"Выберите работы которые производились", "Добавление работы и детали автомобиля", false).Show();
         }
 
         private async void BtnAddUsedUpMaterial_Click(object sender, EventArgs e)

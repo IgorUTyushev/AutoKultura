@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using Xceed.Document.NET;
 using Xceed.Words.NET;
+using Microsoft.IdentityModel.Tokens;
+using System.Data;
 
 namespace AutoKultura
 {
@@ -536,6 +538,18 @@ namespace AutoKultura
             return rowCount;
         }
 
+        private static string UsedUpMaterialToString(List<UsedUpMaterialEntity> usedMaterial)
+        {
+            string result = string.Empty;
+            foreach(UsedUpMaterialEntity material in usedMaterial)
+            {
+                if (!result.IsNullOrEmpty())
+                    result += "\n";
+                result +=material.Material.Name;
+            }
+            return result;
+        }
+
         private async void BtnCreateOrderAnOutfit_Click(object sender, EventArgs e)
         {
             CompanyEntity company;
@@ -624,14 +638,14 @@ namespace AutoKultura
                     .Include(rs => rs.PartOfTheCar)
                     .Include(rs => rs.UsedUpMaterials)
                         .ThenInclude(m => m.Material)
-                     .OrderBy(rs => rs.PartOfTheCar.ServiceType.Title)
+                     .OrderBy(rs => rs.ServiceType.Title)
                     .ToList();
 #pragma warning restore IDE0305 // Упростите инициализацию коллекции
 
 
-                int countRow = CalculateRowTableOrderAnOutfit(renderServiceEntities);
+                int countRowTable = CalculateRowTableOrderAnOutfit(renderServiceEntities);
 
-                Table tableRenderServices = documentOrderOnOutfit.AddTable(countRow+3, 4);
+                Table tableRenderServices = documentOrderOnOutfit.AddTable(countRowTable, 4);
                 tableRenderServices.Alignment = Alignment.center;
                 tableRenderServices.Design = TableDesign.TableGrid;
 
@@ -649,65 +663,90 @@ namespace AutoKultura
                 tableRenderServices.Rows[^1].Cells[1].Paragraphs[0].Append(TbPriceOrderInfo.Text).FontSize(12);
 
 
-                int indexRowServiceType = 0;
+                int indexRowServiceType = 1;
                 int countServiceType = 1;
                 int indexStartMargeCels = 0;
-                List<Guid> includeServiceTypeOrderAnOutfit = [];
-                List<Guid> includeMaterialsOrderAnOutfit = [];
+                Guid? currentServiceTypeId = Guid.Empty;
 
                 string usedUpMaterialStr = "";
-                foreach (RenderServiceEntity renderService in renderServiceEntities)
+
+                foreach (RenderServiceEntity renderServices in renderServiceEntities)
                 {
-                    bool isNullPartOfTheCar = renderService.PartOfTheCar == null;
-                    if (!includeServiceTypeOrderAnOutfit.Contains(renderService.ServiceType.Id))
+                    if(currentServiceTypeId == renderServices.ServiceTypeId)
+                        continue;
+
+                    currentServiceTypeId = renderServices.ServiceTypeId;
+
+                    if (renderServices.PartOfTheCar == null)
                     {
-                        indexRowServiceType++;
-                        includeServiceTypeOrderAnOutfit.Add(renderService.ServiceType.Id);
                         tableRenderServices.Rows[indexRowServiceType].Cells[0].Paragraphs[0].Font("Cambria").Append(countServiceType.ToString()).FontSize(12);
-                        tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderService.ServiceType.Title).FontSize(12);
-                        if (usedUpMaterialStr != "")
-                        {
-                            usedUpMaterialStr = usedUpMaterialStr.Remove(usedUpMaterialStr.Length - 1);
-                            tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterialStr).FontSize(12);
-                        }
-
-                        includeMaterialsOrderAnOutfit.Clear();
-
-                        if(!isNullPartOfTheCar)///////////////////
-                            countServiceType++;
-
-                        indexStartMargeCels = indexRowServiceType;
-                        usedUpMaterialStr = "";
-                    }
-
-                    //foreach (UsedUpMaterialEntity usedUpMaterials in renderService.UsedUpMaterials)
-                    //{
-                    //    if (!includeMaterialsOrderAnOutfit.Contains(usedUpMaterials.Material.Id))
-                    //    {
-                    //        includeMaterialsOrderAnOutfit.Add(usedUpMaterials.Material.Id);
-                    //        usedUpMaterialStr += usedUpMaterials.Material.Name + "\n";
-                    //        //tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterials.Material.Name ).FontSize(12);
-                    //    }
-                    //}
-                   
-
-                    string serviceTypeOrPartOC = "";
-                    int indexRowMaterial = indexRowServiceType;
-
-                    if (!isNullPartOfTheCar)
-                    {
-                        indexRowMaterial++;
-                        tableRenderServices.MergeCellsInColumn(0, indexStartMargeCels, indexRowServiceType + 1);
-                        serviceTypeOrPartOC = renderService.PartOfTheCar.Name;
-                        tableRenderServices.Rows[indexRowMaterial].Cells[1].Paragraphs[0].Font("Cambria").Append(serviceTypeOrPartOC).FontSize(12);
-                        tableRenderServices.Rows[indexRowMaterial].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
+                        tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderServices.ServiceType.Title).FontSize(12);
+                        string material = UsedUpMaterialToString(renderServices.UsedUpMaterials);
+                        tableRenderServices.Rows[indexRowServiceType].Cells[2].Paragraphs[0].Font("Cambria").Append(material).FontSize(12);
+                        tableRenderServices.Rows[indexRowServiceType].Cells[3].Paragraphs[0].Font("Cambria").Append(renderServices.Price.ToString()).FontSize(12);
                     }
                     else
                     {
-                        tableRenderServices.Rows[indexRowServiceType].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
-                    }
+                        tableRenderServices.Rows[indexRowServiceType].Cells[0].Paragraphs[0].Font("Cambria").Append(countServiceType.ToString()).FontSize(12);
+                        tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderServices.ServiceType.Title).FontSize(12);
 
+                        var listPartsOfTheCar = renderServiceEntities.Where(rs => rs.ServiceTypeId == currentServiceTypeId).ToArray();
+                        tableRenderServices.MergeCellsInColumn(0, indexRowServiceType, indexRowServiceType + listPartsOfTheCar.Length);
+
+                        for (int i = 0, deltarow = 1; i < listPartsOfTheCar.Length; i++, deltarow++)
+                        {                            
+                            tableRenderServices.Rows[indexRowServiceType + deltarow].Cells[1].Paragraphs[0].Font("Cambria").Append(listPartsOfTheCar[i].PartOfTheCar.Name).FontSize(12);
+                            string material = UsedUpMaterialToString(listPartsOfTheCar[i].UsedUpMaterials);
+                            tableRenderServices.Rows[indexRowServiceType + deltarow].Cells[2].Paragraphs[0].Font("Cambria").Append(material).FontSize(12);
+                            tableRenderServices.Rows[indexRowServiceType + deltarow].Cells[3].Paragraphs[0].Font("Cambria").Append(listPartsOfTheCar[i].Price.ToString()).FontSize(12);
+                        }
+
+
+                        indexRowServiceType += listPartsOfTheCar.Length;
+                    }
                     indexRowServiceType++;
+                    countServiceType++;
+
+
+                    //if (!includeServiceTypeOrderAnOutfit.Contains(renderService.ServiceType.Id))
+                    //{
+                    //    indexRowServiceType++;
+                    //    includeServiceTypeOrderAnOutfit.Add(renderService.ServiceType.Id);
+                    //    tableRenderServices.Rows[indexRowServiceType].Cells[0].Paragraphs[0].Font("Cambria").Append(countServiceType.ToString()).FontSize(12);
+                    //    tableRenderServices.Rows[indexRowServiceType].Cells[1].Paragraphs[0].Font("Cambria").Append(renderService.ServiceType.Title).FontSize(12);
+                    //    if (usedUpMaterialStr != "")
+                    //    {
+                    //        usedUpMaterialStr = usedUpMaterialStr.Remove(usedUpMaterialStr.Length - 1);
+                    //        tableRenderServices.Rows[indexStartMargeCels].Cells[2].Paragraphs[0].Font("Cambria").Append(usedUpMaterialStr).FontSize(12);
+                    //    }
+
+                    //    includeMaterialsOrderAnOutfit.Clear();
+
+                    //    if(!isNullPartOfTheCar)///////////////////
+                    //        countServiceType++;
+
+                    //    indexStartMargeCels = indexRowServiceType;
+                    //    usedUpMaterialStr = "";
+                    //}                   
+
+
+                    //string serviceTypeOrPartOC = "";
+                    //int indexRowMaterial = indexRowServiceType;
+
+                    //if (!isNullPartOfTheCar)
+                    //{
+                    //    indexRowMaterial++;
+                    //    tableRenderServices.MergeCellsInColumn(0, indexStartMargeCels, indexRowServiceType + 1);
+                    //    serviceTypeOrPartOC = renderService.PartOfTheCar.Name;
+                    //    tableRenderServices.Rows[indexRowMaterial].Cells[1].Paragraphs[0].Font("Cambria").Append(serviceTypeOrPartOC).FontSize(12);
+                    //    tableRenderServices.Rows[indexRowMaterial].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
+                    //}
+                    //else
+                    //{
+                    //    tableRenderServices.Rows[indexRowServiceType].Cells[3].Paragraphs[0].Font("Cambria").Append(renderService.Price.ToString()).FontSize(12);
+                    //}
+
+                    //indexRowServiceType++;
                 }
 
                 if (usedUpMaterialStr != "")

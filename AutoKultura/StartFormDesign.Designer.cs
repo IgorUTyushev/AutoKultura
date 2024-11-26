@@ -1338,7 +1338,7 @@
             cbWarranty.FlatAppearance.MouseOverBackColor = Color.Red;
             cbWarranty.FlatStyle = FlatStyle.Flat;
             cbWarranty.ForeColor = Color.White;
-            cbWarranty.Location = new Point(315, 86);
+            cbWarranty.Location = new Point(311, 86);
             cbWarranty.Name = "cbWarranty";
             cbWarranty.Size = new Size(102, 60);
             cbWarranty.TabIndex = 53;
